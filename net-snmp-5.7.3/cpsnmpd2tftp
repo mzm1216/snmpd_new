@@ -1,0 +1,9 @@
+#! /bin/bash
+
+./configure --host=arm-none-linux-gnueabi --target=arm-none-linux-gnueabi --build=i386-linux -with-cc=arm-none-linux-gnueabi-gcc -with-ar=arm-none-linux-gnueabi-ar --prefix=/usr/local/net-snmp --disable-shared --disable-scripts --with-endianness=little -enable-mini-agent --disable-ipv6 --disable-manuals  --disable-ucd-snmp-compatibility --enable-as-needed --with-mib-modules="vigorPrivateMib" -disable-debugging --disable-mibs --disable-applications --with-persistent-directory="/var/cache/net-snmp" --with-default-snmp-version="2" --without-logfile --without-sys-contact --without-sys-location
+
+make
+cd agent
+arm-none-linux-gnueabi-strip snmpd
+cp snmpd /mnt/hgfs/Ubuntushare/tftpboot/
+cd ..
