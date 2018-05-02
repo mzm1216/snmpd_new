@@ -2197,7 +2197,41 @@ void *SNMP_TRAP_ProcessTrapMsg(void *arg)
         
     }
 }
+void test_snmp_cdd()
+{
+	netsnmp_variable_list *vars = NULL;
+	   uint32_t   specific = 0;
+	   uint32_t   trap_type =0;
+	   uint32_t   enterprise_length = 0;
+	   oid enterprise[128] = {0};
+	   memcpy(enterprise, vigorPubNotifications_oid, len_vigorPubNotifications_oid * sizeof(oid));
+	   enterprise_length = len_vigorPubNotifications_oid;
+	   trap_type = SNMP_TRAP_ENTERPRISESPECIFIC;
+	   specific = 1;
+	   vars = NULL;
+	   QUEUE_MSG_T msg = {0};
+	   int ret_value = MSG_GENERROR;
+	int i;
 
+	for(i=0;i<7;i++)
+		{
+			memset(&msg, 0, sizeof(msg));
+			msg.msg_type = CMD_GET;
+			msg.snmp_msg.oper_code = MSG_CODE_CDD_WORK_MODE + i;
+			ret_value = process_snmpMsg(&msg);
+			if(ret_value != MSG_OK)
+			{
+				snmp_log(LOG_DEBUG,"get 0x[%x] fail %s %d\r\n",msg.snmp_msg.oper_code,__FUNCTION__,__LINE__);
+				//pthread_mutex_unlock(&mut_trap);
+				return;
+			}
+			else
+			{
+				snmp_log(LOG_DEBUG,"^^^^^get 0x[%x] Sucess=[%s] \r\n",msg.snmp_msg.oper_code,msg.snmp_msg.u_data.msg_data_str);
+				//snprintf(trap_heartbeat.vigorSource, PARAM_SIZE, "%s" ,msg.snmp_msg.u_data.msg_data_str);
+			}
+		}
+}
 void SNMP_TRAP_SendHeartBeatTrap(int signo)
 {
 #if 1
@@ -2297,7 +2331,7 @@ void SNMP_TRAP_SendHeartBeatTrap(int signo)
 #endif
 
     SNMP_TRAP_ProcessTrapMsg(NULL);
-    if(time_index %2 != 0)
+    if(time_index %5 != 0)
     {
         time_index++;
 		return;
@@ -2305,6 +2339,7 @@ void SNMP_TRAP_SendHeartBeatTrap(int signo)
 	time_index++;
 
     //pthread_mutex_lock(&mut_trap);
+   // test_snmp_cdd();
     if(strlen(trap_heartbeat.vigorSource) == 0)
     {
         memset(&msg, 0, sizeof(msg));
@@ -2403,8 +2438,8 @@ BOOL SNMP_TRAP_SendTrap(TRAP_EVENT_TrapData_T *trap_data_p)
     switch(trap_data_p->trap_type)
     {
 
-//#if VT_3888_MIB
-#if 1
+#if VT_3888_MIB
+//#if 1
 			case SNMP_TRAP_QUEUE_CDD_CLK_SOURCE_TRAP:
 			{
 				Trap_cddClkSourceState_T *pDynamicData = &(trap_data_p->u.cdd_ClkSourceState_trap);
@@ -2430,8 +2465,8 @@ BOOL SNMP_TRAP_SendTrap(TRAP_EVENT_TrapData_T *trap_data_p)
 					snmp_free_varbind(vars);
 					return FALSE;
 				}
-	
 				
+				snmp_log(LOG_DEBUG,"******Sources %s \r\n",pDynamicData->cddvigorSource);
 				break;
 			}
 
@@ -2442,7 +2477,7 @@ BOOL SNMP_TRAP_SendTrap(TRAP_EVENT_TrapData_T *trap_data_p)
 				memcpy(enterprise, vt3888Notifications_oid, len_vt3888Notifications_oid * sizeof(oid));
 				enterprise_length = len_vt3888Notifications_oid;
 				trap_type = SNMP_TRAP_ENTERPRISESPECIFIC;
-				specific = 1;
+				specific = 2;
 				vars = NULL;
 			
 	
@@ -2472,7 +2507,7 @@ BOOL SNMP_TRAP_SendTrap(TRAP_EVENT_TrapData_T *trap_data_p)
 				memcpy(enterprise, vt3888Notifications_oid, len_vt3888Notifications_oid * sizeof(oid));
 				enterprise_length = len_vt3888Notifications_oid;
 				trap_type = SNMP_TRAP_ENTERPRISESPECIFIC;
-				specific = 1;
+				specific = 3;
 				vars = NULL;
 			
 	
@@ -2503,7 +2538,7 @@ BOOL SNMP_TRAP_SendTrap(TRAP_EVENT_TrapData_T *trap_data_p)
 				memcpy(enterprise, vt3888Notifications_oid, len_vt3888Notifications_oid * sizeof(oid));
 				enterprise_length = len_vt3888Notifications_oid;
 				trap_type = SNMP_TRAP_ENTERPRISESPECIFIC;
-				specific = 1;
+				specific = 4;
 				vars = NULL;
 			
 	
@@ -2533,7 +2568,7 @@ BOOL SNMP_TRAP_SendTrap(TRAP_EVENT_TrapData_T *trap_data_p)
 				memcpy(enterprise, vt3888Notifications_oid, len_vt3888Notifications_oid * sizeof(oid));
 				enterprise_length = len_vt3888Notifications_oid;
 				trap_type = SNMP_TRAP_ENTERPRISESPECIFIC;
-				specific = 1;
+				specific = 5;
 				vars = NULL;
 			
 	
@@ -2563,7 +2598,7 @@ BOOL SNMP_TRAP_SendTrap(TRAP_EVENT_TrapData_T *trap_data_p)
 				memcpy(enterprise, vt3888Notifications_oid, len_vt3888Notifications_oid * sizeof(oid));
 				enterprise_length = len_vt3888Notifications_oid;
 				trap_type = SNMP_TRAP_ENTERPRISESPECIFIC;
-				specific = 1;
+				specific = 6;
 				vars = NULL;
 			
 	

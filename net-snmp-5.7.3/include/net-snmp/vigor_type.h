@@ -147,8 +147,8 @@ typedef struct
 }Trap_vigorProcAbort_T;
 
 #define VT_3308_MIB 	FALSE        	/*同播控制中心*/
-#define VT_3830_MIB   	TRUE       		/*信道机*/
-#define VT_3888_MIB 	FALSE        	/*时钟分配器*/
+#define VT_3830_MIB   	FALSE       		/*信道机*/
+#define VT_3888_MIB 	TRUE        	/*时钟分配器*/
 
 
 /*trap 缓冲区定义 */

@@ -5254,7 +5254,7 @@ get_cddWorkMode(netsnmp_mib_handler *handler,
 
             memset(&queue_msg, 0, sizeof(QUEUE_MSG_T));
             queue_msg.msg_type = CMD_GET;
-            queue_msg.snmp_msg.oper_code = CLK_DISTRIBUTE_MODE;
+            queue_msg.snmp_msg.oper_code = MSG_CODE_CDD_WORK_MODE;
 
             /*
              * get from core layer
@@ -5303,7 +5303,7 @@ get_cddWorkMode(netsnmp_mib_handler *handler,
  
 			 memset(&queue_msg, 0, sizeof(QUEUE_MSG_T));
 			 queue_msg.msg_type = CMD_GET;
-			 queue_msg.snmp_msg.oper_code = CLK_DISTRIBUTE_APP_VER;
+			 queue_msg.snmp_msg.oper_code =  MSG_CODE_CDD_APP_VER;
  
 			 /*
 			  * get from core layer
@@ -5352,7 +5352,7 @@ get_cddWorkMode(netsnmp_mib_handler *handler,
  
 			 memset(&queue_msg, 0, sizeof(QUEUE_MSG_T));
 			 queue_msg.msg_type = CMD_GET;
-			 queue_msg.snmp_msg.oper_code = CLK_DISTRIBUTE_FPGA_VER;
+			 queue_msg.snmp_msg.oper_code = MSG_CODE_CDD_FPGA_VER;
  
 			 /*
 			  * get from core layer
@@ -5403,7 +5403,7 @@ get_cddWorkMode(netsnmp_mib_handler *handler,
   
 			  memset(&queue_msg, 0, sizeof(QUEUE_MSG_T));
 			  queue_msg.msg_type = CMD_GET;
-			  queue_msg.snmp_msg.oper_code = CLK_DISTRIBUTE_HW_VER;
+			  queue_msg.snmp_msg.oper_code =  MSG_CODE_CDD_HW_VER;
   
 			  /*
 			   * get from core layer
@@ -5433,7 +5433,7 @@ get_cddWorkMode(netsnmp_mib_handler *handler,
 
 
 int
-get_cddFPGAstat(netsnmp_mib_handler *handler,
+get_cddModel(netsnmp_mib_handler *handler,
 			netsnmp_handler_registration *reginfo,
 			netsnmp_agent_request_info *reqinfo,
 			netsnmp_request_info *requests)
@@ -5452,7 +5452,7 @@ get_cddFPGAstat(netsnmp_mib_handler *handler,
 
 		   memset(&queue_msg, 0, sizeof(QUEUE_MSG_T));
 		   queue_msg.msg_type = CMD_GET;
-		   queue_msg.snmp_msg.oper_code = CLK_DISTRIBUTE_FPGA_STATE;
+		   queue_msg.snmp_msg.oper_code =  MSG_CODE_CDD_MODEL_STATE;
 
 		   /*
 			* get from core layer
@@ -5481,6 +5481,100 @@ get_cddFPGAstat(netsnmp_mib_handler *handler,
 }
 
 
+int
+get_cddGPSTime(netsnmp_mib_handler *handler,
+			netsnmp_handler_registration *reginfo,
+			netsnmp_agent_request_info *reqinfo,
+			netsnmp_request_info *requests)
+{
+   QUEUE_MSG_T queue_msg;
+   /*
+	* dispatch get vs. set
+	*/
+   switch (reqinfo->mode) {
+	   /*
+		* GET REQUEST
+		*/
+   case MODE_GET:
+	   {
+		   unsigned long		  var_len = 0;
+
+		   memset(&queue_msg, 0, sizeof(QUEUE_MSG_T));
+		   queue_msg.msg_type = CMD_GET;
+		   queue_msg.snmp_msg.oper_code =   MSG_CODE_CDD_GPS_TIME;
+
+		   /*
+			* get from core layer
+			*/
+		   if (process_snmpMsg(&queue_msg) != MSG_OK)
+		   {
+			   return SNMP_ERR_GENERR;
+		   } 
+		   else 
+		   {
+			   var_len = strlen(queue_msg.snmp_msg.u_data.msg_data_str);
+			   memcpy(return_buf, queue_msg.snmp_msg.u_data.msg_data_str, var_len);
+			   snmp_set_var_typed_value(requests->requestvb,
+										ASN_OCTET_STR,
+										(u_char *) return_buf, var_len);
+		   }
+
+		   break;
+	   }
+
+   default:
+	   return SNMP_ERR_GENERR;
+   }
+
+   return SNMP_ERR_NOERROR;
+}
+int
+get_cddPTPTime(netsnmp_mib_handler *handler,
+			netsnmp_handler_registration *reginfo,
+			netsnmp_agent_request_info *reqinfo,
+			netsnmp_request_info *requests)
+{
+   QUEUE_MSG_T queue_msg;
+   /*
+	* dispatch get vs. set
+	*/
+   switch (reqinfo->mode) {
+	   /*
+		* GET REQUEST
+		*/
+   case MODE_GET:
+	   {
+		   unsigned long		  var_len = 0;
+
+		   memset(&queue_msg, 0, sizeof(QUEUE_MSG_T));
+		   queue_msg.msg_type = CMD_GET;
+		   queue_msg.snmp_msg.oper_code =	MSG_CODE_CDD_PTP_TIME;
+
+		   /*
+			* get from core layer
+			*/
+		   if (process_snmpMsg(&queue_msg) != MSG_OK)
+		   {
+			   return SNMP_ERR_GENERR;
+		   } 
+		   else 
+		   {
+			   var_len = strlen(queue_msg.snmp_msg.u_data.msg_data_str);
+			   memcpy(return_buf, queue_msg.snmp_msg.u_data.msg_data_str, var_len);
+			   snmp_set_var_typed_value(requests->requestvb,
+										ASN_OCTET_STR,
+										(u_char *) return_buf, var_len);
+		   }
+
+		   break;
+	   }
+
+   default:
+	   return SNMP_ERR_GENERR;
+   }
+
+   return SNMP_ERR_NOERROR;
+}
 
 
 void
@@ -5494,35 +5588,15 @@ init_vt3888MIBObject(void)
 	   { 1, 3, 6, 1, 4, 1, 259, 1, 4, 1, 3, 0 };
 	static oid	   cddHwVer_oid[] =
 	   { 1, 3, 6, 1, 4, 1, 259, 1, 4, 1, 4, 0 };
-	static oid	   cddFPGAstat_oid[] =
+
+	static oid	   cddModel_oid[] =
 	   { 1, 3, 6, 1, 4, 1, 259, 1, 4, 1, 5, 0 };
-
-	static oid	   cddGPSClkSource_oid[] =
+	static oid	   cddPTPtime_oid[] =
 	   { 1, 3, 6, 1, 4, 1, 259, 1, 4, 1, 6, 0 };
-	static oid	   cddPTPClkSource_oid[] =
+	static oid	   cddGPStime_oid[] =
 	   { 1, 3, 6, 1, 4, 1, 259, 1, 4, 1, 7, 0 };
-	static oid	   cddGPSLockState_oid[] =
-	   { 1, 3, 6, 1, 4, 1, 259, 1, 4, 1, 8, 0 };
-	static oid	   cddPTPLockState_oid[] =
-	   { 1, 3, 6, 1, 4, 1, 259, 1, 4, 1, 9, 0 };
 
-	   
-	static oid	   cddFPGATime_oid[] =
-	   { 1, 3, 6, 1, 4, 1, 259, 1, 4, 1, 10, 0 };
-	static oid		cddGPSTime_oid[] =
-		{ 1, 3, 6, 1, 4, 1, 259, 1, 4, 1, 11, 0 };
-	static oid		cddOMAPTime_oid[] =
-		{ 1, 3, 6, 1, 4, 1, 259, 1, 4, 1, 12, 0 };
-	static oid		cddPHYTime_oid[] =
-		{ 1, 3, 6, 1, 4, 1, 259, 1, 4, 1, 13, 0 };
-	static oid		 cddSys2PHY_oid[] =
-		 { 1, 3, 6, 1, 4, 1, 259, 1, 4, 1, 14, 0 };
-	static oid		 cddPHY2Sys_oid[] =
-		 { 1, 3, 6, 1, 4, 1, 259, 1, 4, 1, 15, 0 };
-	static oid		 cddSecondPulse_oid[] =
-		 { 1, 3, 6, 1, 4, 1, 259, 1, 4, 1, 16, 0 };
-	static oid		 cddNetlink_oid[] =
-		 { 1, 3, 6, 1, 4, 1, 259, 1, 4, 1, 17, 0 };
+
 
    netsnmp_register_instance(netsnmp_create_handler_registration
 							 ("cddworkMode",
@@ -5552,11 +5626,24 @@ init_vt3888MIBObject(void)
 								HANDLER_CAN_RONLY));
 
 	netsnmp_register_instance(netsnmp_create_handler_registration
-							   ("cddFPGAstat",
-							   get_cddFPGAstat,
-							   cddFPGAstat_oid,
-							   OID_LENGTH(cddFPGAstat_oid),
+							   ("cddModel",
+							   get_cddModel,
+							   cddModel_oid,
+							   OID_LENGTH(cddModel_oid),
 							   HANDLER_CAN_RONLY)); 		
-  
+  	netsnmp_register_instance(netsnmp_create_handler_registration
+							   ("cddGPSTime",
+							   get_cddGPSTime,
+							   cddGPStime_oid,
+							   OID_LENGTH(cddGPStime_oid),
+							   HANDLER_CAN_RONLY)); 	
+
+
+   	netsnmp_register_instance(netsnmp_create_handler_registration
+							   ("cddPTPTime",
+							   get_cddPTPTime,
+							   cddPTPtime_oid,
+							   OID_LENGTH(cddPTPtime_oid),
+							   HANDLER_CAN_RONLY)); 		
 }
 
